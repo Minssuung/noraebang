@@ -1,0 +1,36 @@
+name: Build macOS app
+
+# 코드를 올리거나(main 브랜치), Actions 탭에서 수동 실행하면
+# GitHub의 macOS(Apple Silicon) 서버가 .dmg 를 만들어 줍니다.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: # Actions 탭에서 버튼으로 수동 실행
+
+jobs:
+  build-mac:
+    runs-on: macos-14 # Apple Silicon(arm64) 러너
+    steps:
+      - name: 코드 가져오기
+        uses: actions/checkout@v4
+
+      - name: Node 설치
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: 의존성 설치
+        run: npm install
+
+      - name: macOS 앱(.dmg) 빌드
+        env:
+          # 서명 인증서를 찾지 않게 해서 미서명(ad-hoc)으로 빌드
+          CSC_IDENTITY_AUTO_DISCOVERY: false
+        run: npm run dist:mac
+
+      - name: .dmg 업로드 (다운로드용 결과물)
+        uses: actions/upload-artifact@v4
+        with:
+          name: noraebang-mac-arm64
+          path: dist/*.dmg
+          if-no-files-found: error

@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🎤 노래방</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app">
+    <header>
+      <h1>🎤 노래방</h1>
+      <p class="sub">반주를 열고 마이크를 켜서 노래해 보세요</p>
+    </header>
+
+    <!-- 곡 불러오기 / 드롭존 -->
+    <section id="dropzone" class="dropzone">
+      <p>반주(MR) 음원 파일을 여기에 끌어다 놓거나</p>
+      <button id="openBtn" class="btn primary">파일 열기</button>
+      <input id="fileInput" type="file" accept="audio/*" hidden />
+      <p class="hint">mp3, m4a, wav, flac 등 지원</p>
+    </section>
+
+    <!-- 플레이어 -->
+    <section id="player" class="player hidden">
+      <div class="track-name" id="trackName">—</div>
+
+      <div class="seek">
+        <span id="curTime">0:00</span>
+        <input id="seekBar" type="range" min="0" max="100" value="0" step="0.1" />
+        <span id="durTime">0:00</span>
+      </div>
+
+      <div class="transport">
+        <button id="playBtn" class="btn play">▶︎ 재생</button>
+        <button id="loadOtherBtn" class="btn ghost">다른 곡</button>
+      </div>
+
+      <div class="mixer">
+        <div class="ch">
+          <label>🎵 반주 볼륨</label>
+          <input id="musicVol" type="range" min="0" max="100" value="80" />
+        </div>
+
+        <div class="ch">
+          <label>
+            🎤 마이크
+            <button id="micBtn" class="btn small">켜기</button>
+          </label>
+          <input id="micVol" type="range" min="0" max="100" value="70" disabled />
+        </div>
+
+        <div class="ch">
+          <label>🔊 에코</label>
+          <input id="echoVol" type="range" min="0" max="100" value="0" disabled />
+        </div>
+
+        <div class="ch">
+          <label>⏱ 에코 길이</label>
+          <input id="echoTime" type="range" min="80" max="500" value="230" disabled />
+        </div>
+      </div>
+
+      <div id="micStatus" class="mic-status">마이크 꺼짐</div>
+
+      <div class="record">
+        <button id="recordBtn" class="btn record-btn">● 처음부터 녹음</button>
+        <span id="recIndicator" class="rec-indicator hidden">
+          <span class="rec-dot"></span> 녹음 중 <span id="recTime">0:00</span>
+        </span>
+      </div>
+
+      <div id="result" class="result hidden">
+        <div class="result-title">🎧 내 녹음 (반주 + 내 목소리)</div>
+        <button id="resultPlayBtn" class="btn play">▶︎ 같이 듣기</button>
+        <div class="sync">
+          <label>🎚 싱크 보정 — 목소리 당기기: <b><span id="syncVal">150</span> ms</b></label>
+          <input id="syncSlider" type="range" min="0" max="400" value="150" />
+          <div class="sync-hint">목소리가 반주보다 <b>늦게</b> 들리면 값을 올리세요</div>
+        </div>
+        <a id="downloadLink" class="btn ghost" href="#">⬇ 파일로 저장 (WAV)</a>
+      </div>
+    </section>
+
+    <p class="warn">⚠️ 스피커로 들으면 하울링(삐~)이 생길 수 있어요. <b>이어폰/헤드셋</b> 권장!</p>
+  </div>
+
+  <script src="renderer.js"></script>
+</body>
+</html>

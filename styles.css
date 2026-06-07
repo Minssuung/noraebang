@@ -1,0 +1,186 @@
+:root {
+  --bg: #0b0b14;
+  --panel: #16162a;
+  --panel-2: #1e1e38;
+  --accent: #ff3e7f;
+  --accent-2: #7b5cff;
+  --text: #f2f2f7;
+  --muted: #9a9ab5;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: -apple-system, "Segoe UI", "Noto Sans KR", sans-serif;
+  background: radial-gradient(1200px 600px at 50% -10%, #221a3a 0%, var(--bg) 60%);
+  color: var(--text);
+  min-height: 100vh;
+}
+
+.app {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 32px 24px 48px;
+}
+
+header { text-align: center; margin-bottom: 24px; }
+header h1 { margin: 0; font-size: 34px; }
+header .sub { color: var(--muted); margin: 6px 0 0; }
+
+.hidden { display: none !important; }
+
+.btn {
+  border: none;
+  border-radius: 10px;
+  padding: 10px 18px;
+  font-size: 15px;
+  cursor: pointer;
+  background: var(--panel-2);
+  color: var(--text);
+  transition: transform .05s ease, filter .15s ease;
+}
+.btn:hover { filter: brightness(1.15); }
+.btn:active { transform: scale(0.97); }
+.btn.primary { background: linear-gradient(135deg, var(--accent), var(--accent-2)); font-weight: 600; }
+.btn.play { background: linear-gradient(135deg, var(--accent), var(--accent-2)); font-weight: 700; min-width: 130px; font-size: 17px; }
+.btn.ghost { background: transparent; border: 1px solid #34344f; }
+.btn.small { padding: 4px 12px; font-size: 13px; margin-left: 8px; }
+
+.dropzone {
+  border: 2px dashed #34344f;
+  border-radius: 16px;
+  padding: 48px 24px;
+  text-align: center;
+  background: var(--panel);
+  transition: border-color .15s ease, background .15s ease;
+}
+.dropzone.drag { border-color: var(--accent); background: var(--panel-2); }
+.dropzone p { margin: 8px 0; }
+.dropzone .hint { color: var(--muted); font-size: 13px; }
+
+.player {
+  background: var(--panel);
+  border-radius: 16px;
+  padding: 24px;
+}
+
+.track-name {
+  font-size: 18px;
+  font-weight: 600;
+  text-align: center;
+  margin-bottom: 18px;
+  word-break: break-all;
+}
+
+.seek {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+.seek span { font-variant-numeric: tabular-nums; color: var(--muted); font-size: 13px; min-width: 40px; text-align: center; }
+.seek input[type=range] { flex: 1; }
+
+.transport {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 26px;
+}
+
+.mixer {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px 24px;
+}
+.ch label {
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+.ch input[type=range] { width: 100%; }
+
+input[type=range] {
+  -webkit-appearance: none;
+  height: 6px;
+  border-radius: 4px;
+  background: #34344f;
+  outline: none;
+}
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  cursor: pointer;
+}
+input[type=range]:disabled { opacity: .4; }
+
+.mic-status {
+  margin-top: 20px;
+  text-align: center;
+  font-size: 14px;
+  color: var(--muted);
+}
+.mic-status.on { color: #4ade80; }
+
+.record {
+  margin-top: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+}
+.record-btn {
+  background: #b91c4a;
+  font-weight: 600;
+}
+.record-btn.recording {
+  background: #ef4444;
+}
+.rec-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #ff6b6b;
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+}
+.rec-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #ef4444;
+  animation: blink 1s steps(2, start) infinite;
+}
+@keyframes blink { to { opacity: 0; } }
+
+.result {
+  margin-top: 22px;
+  padding: 18px;
+  border-radius: 12px;
+  background: var(--panel-2);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+.result-title { font-size: 15px; font-weight: 600; }
+.result audio { width: 100%; }
+.sync { width: 100%; text-align: center; }
+.sync label { display: block; font-size: 14px; color: var(--muted); margin-bottom: 8px; }
+.sync label b { color: var(--text); }
+.sync input[type=range] { width: 100%; }
+.sync-hint { font-size: 12px; color: var(--muted); margin-top: 6px; }
+.sync-hint b { color: var(--text); }
+
+.warn {
+  margin-top: 24px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--muted);
+}
+.warn b { color: var(--text); }

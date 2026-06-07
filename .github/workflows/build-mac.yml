@@ -36,11 +36,14 @@ jobs:
           codesign --force --deep --sign - "$APP"
           codesign --verify --verbose=2 "$APP" || true
 
-      # 서명된 .app 으로 .dmg 만들기
+      # 서명된 .app 으로 .dmg 만들기 (응용 프로그램 폴더 바로가기 포함 → 드래그 설치)
       - name: DMG 생성
         run: |
           APP=$(ls -d dist/mac-arm64/*.app)
-          hdiutil create -volname "노래방" -srcfolder "$APP" -ov -format UDZO "dist/노래방-arm64.dmg"
+          mkdir -p dmg-stage
+          cp -R "$APP" dmg-stage/
+          ln -s /Applications "dmg-stage/Applications"
+          hdiutil create -volname "노래방" -srcfolder dmg-stage -ov -format UDZO "dist/노래방-arm64.dmg"
 
       - name: .dmg 업로드 (다운로드용 결과물)
         uses: actions/upload-artifact@v4

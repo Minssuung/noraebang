@@ -22,11 +22,25 @@ jobs:
       - name: 의존성 설치
         run: npm install
 
-      - name: macOS 앱(.dmg) 빌드
+      # dmg가 아니라 앱(.app) 폴더 형태로만 먼저 빌드 (서명은 다음 단계에서)
+      - name: 앱 빌드 (.app)
         env:
-          # 서명 인증서를 찾지 않게 해서 미서명(ad-hoc)으로 빌드
           CSC_IDENTITY_AUTO_DISCOVERY: false
-        run: npm run dist:mac
+        run: npx electron-builder --mac --arm64 --dir
+
+      # Apple Silicon은 서명 없으면 "손상됨"으로 차단됨 → ad-hoc 서명을 넣어준다
+      - name: ad-hoc 코드 서명
+        run: |
+          APP=$(ls -d dist/mac-arm64/*.app)
+          echo "서명할 앱: $APP"
+          codesign --force --deep --sign - "$APP"
+          codesign --verify --verbose=2 "$APP" || true
+
+      # 서명된 .app 으로 .dmg 만들기
+      - name: DMG 생성
+        run: |
+          APP=$(ls -d dist/mac-arm64/*.app)
+          hdiutil create -volname "노래방" -srcfolder "$APP" -ov -format UDZO "dist/노래방-arm64.dmg"
 
       - name: .dmg 업로드 (다운로드용 결과물)
         uses: actions/upload-artifact@v4

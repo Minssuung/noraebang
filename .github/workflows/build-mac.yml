@@ -28,31 +28,29 @@ jobs:
           CSC_IDENTITY_AUTO_DISCOVERY: false
         run: npx electron-builder --mac --arm64 --dir
 
-      # 내부 모든 Mach-O 바이너리 → 프레임워크 → 헬퍼 앱 → 메인 앱 순서로 전부 ad-hoc 재서명.
-      # (electron-builder의 퓨즈 수정/이름 변경으로 깨진 서명을 안쪽부터 모두 복구)
+      # 내부 모든 Mach-O → 프레임워크 → 헬퍼 앱 → 메인 앱 순서로 전부 ad-hoc 재서명.
+      # Electron 표준 entitlement(JIT/라이브러리검증해제/마이크) + 하드닝런타임으로 서명해야
+      # 런타임에 AMFI가 죽이지 않음(trace trap 방지).
       - name: ad-hoc 코드 서명
         run: |
           APP=$(ls -d dist/mac-arm64/*.app)
+          ENT="$PWD/build/entitlements.mac.plist"
           echo "서명 대상: $APP"
+          echo "엔타이틀먼트: $ENT"
+          SIGN() { codesign --force --options runtime --entitlements "$ENT" --sign - "$1"; }
           # 1) Frameworks 내부의 모든 Mach-O 파일 (dylib, .node, 프레임워크/헬퍼 바이너리, crashpad 등)
           find "$APP/Contents/Frameworks" -type f | while read -r f; do
             if file "$f" | grep -q "Mach-O"; then
-              codesign --force --sign - "$f"
+              codesign --force --options runtime --entitlements "$ENT" --sign - "$f"
             fi
           done
           # 2) 프레임워크 번들 재봉인
-          for fw in "$APP/Contents/Frameworks/"*.framework; do
-            codesign --force --sign - "$fw"
-          done
+          for fw in "$APP/Contents/Frameworks/"*.framework; do SIGN "$fw"; done
           # 3) 헬퍼 앱 번들 재봉인
-          for helper in "$APP/Contents/Frameworks/"*.app; do
-            codesign --force --sign - "$helper"
-          done
+          for helper in "$APP/Contents/Frameworks/"*.app; do SIGN "$helper"; done
           # 4) 메인 실행 파일 & 최상위 앱
-          for m in "$APP/Contents/MacOS/"*; do
-            codesign --force --sign - "$m"
-          done
-          codesign --force --sign - "$APP"
+          for m in "$APP/Contents/MacOS/"*; do SIGN "$m"; done
+          SIGN "$APP"
 
       # 서명이 실제로 유효한지 검증 (깨졌으면 여기서 빌드 실패 → 바로 알 수 있음)
       - name: 서명 검증

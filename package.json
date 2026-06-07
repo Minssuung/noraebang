@@ -6,8 +6,8 @@
   "scripts": {
     "start": "PIPEWIRE_LATENCY=64/48000 electron . --no-sandbox",
     "start:mac": "electron .",
-    "dist:mac": "electron-builder --mac --arm64",
-    "dist:mac-universal": "electron-builder --mac --universal"
+    "dist:mac": "electron-builder --mac --arm64 --publish never",
+    "dist:mac-universal": "electron-builder --mac --universal --publish never"
   },
   "author": "",
   "license": "MIT",
@@ -30,6 +30,7 @@
     ],
     "mac": {
       "category": "public.app-category.music",
+      "icon": "build/icon.png",
       "target": [
         "dmg"
       ],

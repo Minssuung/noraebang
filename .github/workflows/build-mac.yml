@@ -22,21 +22,42 @@ jobs:
       - name: 의존성 설치
         run: npm install
 
-      # electron-builder 가 직접 ad-hoc 서명(identity "-")까지 하고 .dmg 생성
-      # (내부 헬퍼/프레임워크를 올바른 순서로 서명 → "손상됨" 방지)
-      - name: macOS 앱(.dmg) 빌드
-        run: npm run dist:mac
+      # 서명 없이 .app 형태로만 빌드 (서명은 다음 단계에서 직접)
+      - name: 앱 빌드 (.app)
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: false
+        run: npx electron-builder --mac --arm64 --dir
 
-      # 서명이 실제로 유효한지 검증 (깨졌으면 여기서 빌드 실패시킴)
+      # electron-builder가 헬퍼 앱 이름을 바꾸며 깨뜨린 번들 서명만 ad-hoc로 다시 봉인.
+      # 내부 바이너리/프레임워크 서명은 원본(유효)을 그대로 두고, 헬퍼 번들 → 최상위 앱 순서로 재서명.
+      - name: ad-hoc 코드 서명
+        run: |
+          set -euo pipefail
+          APP=$(ls -d dist/mac-arm64/*.app)
+          echo "서명 대상: $APP"
+          # 1) 헬퍼 앱 번들들 재서명
+          for helper in "$APP/Contents/Frameworks/"*.app; do
+            echo "  helper 서명: $helper"
+            codesign --force --sign - "$helper"
+          done
+          # 2) 최상위 앱 번들 재서명
+          codesign --force --sign - "$APP"
+
+      # 서명이 실제로 유효한지 검증 (깨졌으면 여기서 빌드 실패 → 바로 알 수 있음)
       - name: 서명 검증
         run: |
           APP=$(ls -d dist/mac-arm64/*.app)
-          echo "검증할 앱: $APP"
           codesign --verify --deep --strict --verbose=2 "$APP"
-          echo "--- codesign 정보 ---"
-          codesign -dvvv "$APP" 2>&1 | grep -Ei "Signature|Identifier|TeamIdentifier|flags" || true
-          echo "--- Gatekeeper 평가 (ad-hoc은 거부가 정상, 참고용) ---"
-          spctl -a -vvv "$APP" 2>&1 || true
+          echo "✅ 서명 유효"
+
+      # 서명된 .app 으로 .dmg 생성 (응용 프로그램 폴더 바로가기 포함)
+      - name: DMG 생성
+        run: |
+          APP=$(ls -d dist/mac-arm64/*.app)
+          mkdir -p dmg-stage
+          cp -R "$APP" dmg-stage/
+          ln -s /Applications "dmg-stage/Applications"
+          hdiutil create -volname "노래방" -srcfolder dmg-stage -ov -format UDZO "dist/노래방-arm64.dmg"
 
       - name: .dmg 업로드 (다운로드용 결과물)
         uses: actions/upload-artifact@v4

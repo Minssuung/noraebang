@@ -34,7 +34,6 @@
       "target": [
         "dmg"
       ],
-      "identity": "-",
       "hardenedRuntime": false,
       "gatekeeperAssess": false,
       "extendInfo": {
